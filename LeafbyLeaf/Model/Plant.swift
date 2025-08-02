@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 
 struct Plant: Identifiable, Codable {
     let id = UUID()
@@ -15,6 +16,7 @@ struct Plant: Identifiable, Codable {
     var notes: String
     var lastWatered: Date?
     var lastFertilized: Date?
+    var photoData: Data?
     
     init(name: String, species: String = "", notes: String = "") {
         self.name = name
@@ -23,6 +25,8 @@ struct Plant: Identifiable, Codable {
         self.notes = notes
         self.lastWatered = nil
         self.lastFertilized = nil
+        self.photoData = nil
+        
     }
     
     mutating func water() {
@@ -31,6 +35,15 @@ struct Plant: Identifiable, Codable {
     
     mutating func fertilized() {
         lastFertilized = Date()
+    }
+    
+    mutating func addPhoto(_ image: UIImage) {
+        photoData = image.jpegData(compressionQuality: 0.8)
+    }
+    
+    var photo: UIImage? {
+        guard let photoData = photoData else { return nil }
+        return UIImage(data: photoData)
     }
     
     var daysSinceWatered: Int? {

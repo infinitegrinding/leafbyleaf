@@ -10,17 +10,46 @@ import SwiftUI
 struct PlantDetailView: View {
     @Binding var plant: Plant
     @Environment(\.dismiss) private var dismiss
+    @State private var showingPhotoCapture = false
     
     var body: some View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 20) {
+                    // Plant Photo Section
+                    VStack(spacing: 12) {
+                        if let photo = plant.photo {
+                            Image(uiImage: photo)
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(maxHeight: 250)
+                                .cornerRadius(12)
+                                .onTapGesture {
+                                    showingPhotoCapture = true
+                                }
+                        } else {
+                            Button(action: {
+                                showingPhotoCapture = true
+                            }) {
+                                VStack(spacing: 16) {
+                                    Image(systemName: "camera.fill")
+                                        .font(.system(size: 40))
+                                        .foregroundColor(.gray)
+                                    Text("Add Photo")
+                                        .font(.headline)
+                                        .foregroundColor(.gray)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 200)
+                                .background(Color(.systemGray6))
+                                .cornerRadius(12)
+                            }
+                        }
+                    }
+                    .padding(.horizontal)
+                    
                     // Plant Header
                     VStack(spacing: 12) {
-                        Image(systemName: "leaf.fill")
-                            .font(.system(size: 60))
-                            .foregroundColor(.green)
-                        
                         Text(plant.name)
                             .font(.title)
                             .fontWeight(.bold)
@@ -28,6 +57,7 @@ struct PlantDetailView: View {
                         Text(plant.species)
                             .font(.title3)
                             .foregroundColor(.secondary)
+                        
                     }
                     .padding()
                     
@@ -71,6 +101,15 @@ struct PlantDetailView: View {
                                     plant.water()
                                 }
                             )
+                            
+                            CareActionButton(
+                                title: "Fertilize",
+                                icon: "leaf.fill",
+                                color: .green,
+                                action: {
+                                    plant.fertilized()
+                                }
+                            )
                         }
                     }
                     .padding(.horizontal)
@@ -94,9 +133,8 @@ struct PlantDetailView: View {
                         Text("Plant Info")
                             .font(.headline)
                         
-                        Text("Added: \(plant.dateAdded, style: .date)")
-                                                .font(.caption2)
-                                                .foregroundColor(.secondary)
+                        InfoRow(label: "Added", value: plant.dateAdded)
+                        InfoRow(label: "Days Owned", value: plant.dateAdded, isRelative: true)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal)
@@ -110,6 +148,11 @@ struct PlantDetailView: View {
                     Button("Done") {
                         dismiss()
                     }
+                }
+            }
+            .sheet(isPresented: $showingPhotoCapture) {
+                PhotoCaptureView { image in
+                    plant.addPhoto(image)
                 }
             }
         }
